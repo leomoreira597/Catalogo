@@ -102,3 +102,4 @@
 /home/leonardo/Documentos/Arceus/curso-dot-net/catalog/obj/Debug/net8.0/catalog.pdb
 /home/leonardo/Documentos/Arceus/curso-dot-net/catalog/obj/Debug/net8.0/catalog.genruntimeconfig.cache
 /home/leonardo/Documentos/Arceus/curso-dot-net/catalog/obj/Debug/net8.0/ref/catalog.dll
+/home/leonardo/Documentos/Arceus/curso-dot-net/catalog/obj/Debug/net8.0/catalog.sourcelink.json
