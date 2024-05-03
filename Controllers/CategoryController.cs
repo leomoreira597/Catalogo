@@ -23,7 +23,7 @@ namespace catalog.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Category>> GetCategories()
         {
-            var categories = _context.Categories.ToList();
+            var categories = _context.Categories.AsNoTracking().ToList();
             if (categories is null)
             {
                 return NotFound("categorias não encontradas...");
@@ -34,7 +34,7 @@ namespace catalog.Controllers
         [HttpGet("Products")]
         public ActionResult<IEnumerable<Category>> GetCategoryWithProducts()
         {
-            return _context.Categories.Include(product => product.Products).ToList();
+            return _context.Categories.Include(product => product.Products).AsNoTracking().ToList();
         }
 
         [HttpGet("{id:int}", Name = "ObterCategoria")]
