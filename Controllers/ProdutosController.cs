@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using catalog.Context;
 using catalog.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 
 namespace catalog.Controllers
@@ -32,8 +33,9 @@ namespace catalog.Controllers
         }
 
         [HttpGet("{id:int}", Name = "ObterProduto")]
-        public async Task<ActionResult<Product>> GetProducts(int id)
+        public async Task<ActionResult<Product>> GetProducts(int id, [BindRequired]string name)
         {
+            var productName = name;
             var product = await _context.Products.FirstOrDefaultAsync(product => product.ProductId == id);
             if (product is null)
             {
