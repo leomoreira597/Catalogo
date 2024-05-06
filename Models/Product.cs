@@ -5,14 +5,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using catalog.Validations;
 
 namespace catalog.Models
 {
     public class Product
     {
         public int ProductId { get; set; }
-        [Required]
+        [Required(ErrorMessage = "O nome é obrigatorio")]
         [StringLength(80)]
+        [FirstCaps]
         public string? Name { get; set; }
         [Required]
         [StringLength(300)]
