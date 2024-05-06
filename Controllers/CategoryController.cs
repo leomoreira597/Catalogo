@@ -23,12 +23,20 @@ namespace catalog.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Category>> GetCategories()
         {
-            var categories = _context.Categories.AsNoTracking().ToList();
-            if (categories is null)
+            try
             {
-                return NotFound("categorias não encontradas...");
+                var categories = _context.Categories.AsNoTracking().ToList();
+                if (categories is null)
+                {
+                    return NotFound("categorias não encontradas...");
+                }
+                return categories;
             }
-            return categories;
+            catch (System.Exception)
+            {
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar sua Solicitação");
+            }
         }
 
         [HttpGet("Products")]

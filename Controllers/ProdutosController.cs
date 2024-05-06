@@ -21,9 +21,9 @@ namespace catalog.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> GetProducts()
+        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
-            var products = _context.Products.ToList();
+            var products = await _context.Products.AsNoTracking().ToListAsync();
             if (products is null)
             {
                 return NotFound("Produtos não encontrados....");
@@ -32,9 +32,9 @@ namespace catalog.Controllers
         }
 
         [HttpGet("{id:int}", Name = "ObterProduto")]
-        public ActionResult<Product> GetProducts(int id)
+        public async Task<ActionResult<Product>> GetProducts(int id)
         {
-            var product = _context.Products.FirstOrDefault(product => product.ProductId == id);
+            var product = await _context.Products.FirstOrDefaultAsync(product => product.ProductId == id);
             if (product is null)
             {
                 return NotFound("Produto não encontrado....");
