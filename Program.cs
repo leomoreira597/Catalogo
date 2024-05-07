@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using catalog.Context;
 using catalog.Extensions;
+using catalog.Filters;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 string? psqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddScoped<ApiLoggingFilter>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 options.UseNpgsql(psqlConnection)
