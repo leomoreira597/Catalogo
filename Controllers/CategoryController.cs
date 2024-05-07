@@ -48,6 +48,7 @@ namespace catalog.Controllers
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<Category> GetCategory(int id)
         {
+            throw new Exception("Deu ruim ao retornar pelo Id");
             var category = _context.Categories.FirstOrDefault(category => category.CategoryId == id);
             if (category is null)
             {
