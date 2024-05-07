@@ -9,7 +9,7 @@ using catalog.Validations;
 
 namespace catalog.Models
 {
-    public class Product
+    public class Product : IValidatableObject
     {
         public int ProductId { get; set; }
         [Required(ErrorMessage = "O nome é obrigatorio")]
@@ -20,7 +20,7 @@ namespace catalog.Models
         [StringLength(300)]
         public string? Description { get; set; }
         [Required]
-        [Column(TypeName ="decimal(10,2)")]
+        [Column(TypeName = "decimal(10,2)")]
         public decimal Price { get; set; }
         [Required]
         [StringLength(300)]
@@ -30,5 +30,23 @@ namespace catalog.Models
         public int CategoryId { get; set; }
         [JsonIgnore]
         public Category? Category { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (!string.IsNullOrEmpty(this.Name))
+            {
+                var firsrString = this.Name[0].ToString();
+                if (firsrString != firsrString.ToUpper())
+                {
+                    yield return new
+                        ValidationResult("A primeira letra tem que ser maiuscula", new[] { nameof(this.Name) });
+                }
+            }
+            if (this.Stock <= 0)
+            {
+                yield return new
+                    ValidationResult("O estoque deve ser maior que zero", new[] { nameof(this.Stock) });
+            }
+        }
     }
 }
