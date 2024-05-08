@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace catalog.Models
@@ -20,6 +21,7 @@ namespace catalog.Models
         [Required]
         [StringLength(300)]
         public string? ImageUrl { get; set; }
+        [JsonIgnore]
         public ICollection<Product>? Products { get; set; }
     }
 }

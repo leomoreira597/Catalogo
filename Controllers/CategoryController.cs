@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using catalog.Context;
 using catalog.Filters;
 using catalog.Models;
+using catalog.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,49 +15,37 @@ namespace catalog.Controllers
     [Route("[controller]")]
     public class CategoryController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ICategoryRepository _repository;
 
-        public CategoryController(AppDbContext context)
+        public CategoryController(ICategoryRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
         public ActionResult<IEnumerable<Category>> GetCategories()
         {
-            try
-            {
-                var categories = _context.Categories.AsNoTracking().ToList();
-                if (categories is null)
-                {
-                    return NotFound("categorias não encontradas...");
-                }
-                return categories;
-            }
-            catch (System.Exception)
-            {
-
-                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar sua Solicitação");
-            }
+            var category = _repository.GetCategories();
+            return Ok(category);
         }
 
         [HttpGet("Products")]
         public ActionResult<IEnumerable<Category>> GetCategoryWithProducts()
         {
-            return _context.Categories.Include(product => product.Products).AsNoTracking().ToList();
+           var category = _repository.GetCategoriesWithProducts();
+           return Ok(category);
         }
 
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<Category> GetCategory(int id)
         {
-            throw new Exception("Deu ruim ao retornar pelo Id");
-            var category = _context.Categories.FirstOrDefault(category => category.CategoryId == id);
+            var category = _repository.GetCategory(id);
             if (category is null)
             {
                 return NotFound("categoria não encontrado....");
             }
-            return category;
+            return Ok(category);
         }
 
         [HttpPost]
@@ -66,9 +55,29 @@ namespace catalog.Controllers
             {
                 return BadRequest("Categoria está nula ");
             }
-            _context.Categories.Add(category);
-            _context.SaveChanges();
-            return new CreatedAtRouteResult("ObterCategoria", new { id = category.CategoryId }, category);
+            var categoryCreated = _repository.Create(category);
+            return new CreatedAtRouteResult("ObterCategoria", new { id = categoryCreated.CategoryId }, categoryCreated);
+        }
+        [HttpPut]
+        public ActionResult Put(int id, Category category)
+        {
+            if (id != category.CategoryId)
+            {
+                return BadRequest("Dados invalidos");
+            }
+            _repository.Update(category);
+            return Ok(category);
+        }
+        [HttpDelete("{id:int}")]
+        public ActionResult Delete(int id)
+        {
+            var category = _repository.GetCategory(id);
+            if (category == null)
+            {
+                return NotFound("O id de categoria passado não existe");
+            }
+            var categoryDeleted = _repository.Delete(id);
+            return Ok(categoryDeleted);
         }
     }
 }
