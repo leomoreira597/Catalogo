@@ -17,6 +17,7 @@ builder.Services.AddSwaggerGen();
 string? psqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddScoped<ApiLoggingFilter>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 options.UseNpgsql(psqlConnection)
