@@ -15,32 +15,31 @@ namespace catalog.Controllers
     [Route("[controller]")]
     public class CategoryController : ControllerBase
     {
-        private readonly ICategoryRepository _repository;
-
-        public CategoryController(ICategoryRepository repository)
+        private readonly ICategoryRepository _categoryRepository;
+        public CategoryController(ICategoryRepository categoryRepository)
         {
-            _repository = repository;
+            _categoryRepository = categoryRepository;
         }
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
         public ActionResult<IEnumerable<Category>> GetCategories()
         {
-            var category = _repository.GetCategories();
+            var category = _categoryRepository.GetAll();
             return Ok(category);
         }
 
         [HttpGet("Products")]
         public ActionResult<IEnumerable<Category>> GetCategoryWithProducts()
         {
-           var category = _repository.GetCategoriesWithProducts();
+           var category = _categoryRepository.GetCategoriesWithProducts();
            return Ok(category);
         }
 
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<Category> GetCategory(int id)
         {
-            var category = _repository.GetCategory(id);
+            var category = _categoryRepository.Get(C => C.CategoryId == id);
             if (category is null)
             {
                 return NotFound("categoria não encontrado....");
@@ -55,7 +54,7 @@ namespace catalog.Controllers
             {
                 return BadRequest("Categoria está nula ");
             }
-            var categoryCreated = _repository.Create(category);
+            var categoryCreated = _categoryRepository.Create(category);
             return new CreatedAtRouteResult("ObterCategoria", new { id = categoryCreated.CategoryId }, categoryCreated);
         }
         [HttpPut]
@@ -65,18 +64,18 @@ namespace catalog.Controllers
             {
                 return BadRequest("Dados invalidos");
             }
-            _repository.Update(category);
+            _categoryRepository.Updated(category);
             return Ok(category);
         }
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            var category = _repository.GetCategory(id);
+            var category = _categoryRepository.Get(c => c.CategoryId == id);
             if (category == null)
             {
                 return NotFound("O id de categoria passado não existe");
             }
-            var categoryDeleted = _repository.Delete(id);
+            var categoryDeleted = _categoryRepository.Delete(category);
             return Ok(categoryDeleted);
         }
     }

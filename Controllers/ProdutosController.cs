@@ -15,36 +15,46 @@ namespace catalog.Controllers
     [Route("[controller]")]
     public class ProdutosController : ControllerBase
     {
-        private readonly IProductRepository _repository;
+        
+        private readonly IProductRepository _productRepository;
 
-        public ProdutosController(IProductRepository repository)
+        public ProdutosController(IProductRepository productRepository)
         {
-            _repository = repository;
+            _productRepository = productRepository;
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<Product>> GetProducts()
         {
-            var products = _repository.GetProducts().ToList();
+            var products = _productRepository.GetAll();
             if (products is null)
             {
                 return NotFound("Produtos não encontrados....");
             }
-            return products;
+            return Ok(products);
         }
 
         [HttpGet("{id:int}", Name = "ObterProduto")]
         public ActionResult<Product> GetProducts(int id, [BindRequired] string name)
         {
             var productName = name;
-            var product = _repository.GetProduct(id);
+            var product = _productRepository.Get(p => p.ProductId == id);
             if (product is null)
             {
                 return NotFound("Produto não encontrado....");
             }
             return Ok(product);
         }
-
+        [HttpGet("products/{id}")]
+        public ActionResult<IEnumerable<Product>> GetCategoryProduct(int id)
+        {
+            var products = _productRepository.GetProductsForCategory(id);
+            if (products is null)
+            {
+                return NotFound();
+            }
+            return Ok(products);
+        }
         [HttpPost]
         public ActionResult Post(Product product)
         {
@@ -52,7 +62,7 @@ namespace catalog.Controllers
             {
                 return BadRequest();
             }
-            var newProduct = _repository.Create(product);
+            var newProduct = _productRepository.Create(product);
 
             return new CreatedAtRouteResult("ObterProduto", new { id = newProduct.ProductId }, newProduct);
         }
@@ -64,27 +74,20 @@ namespace catalog.Controllers
             {
                 return BadRequest("Os ids não batem.....");
             }
-            bool refresh = _repository.Update(product);
-            if (refresh)
-            {
-                return Ok(product);
-            }
-
-            return StatusCode(500, $"Falha ao atualizar o produto de id = {id}");
+            _productRepository.Updated(product);
+            return Ok(product);
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            bool deleted = _repository.Delete(id);
-            if (deleted)
+            var product = _productRepository.Get(p => p.ProductId == id);
+            if (product is null)
             {
-                return Ok("O produto foi excluido");
+                return BadRequest("Produto não encontrado");
             }
-            else
-            {
-                return StatusCode(500, $"Falha ao excluir produto de id = {id}");
-            }
+            _productRepository.Delete(product);
+            return Ok($"Produto deletado com sucesso: {product}");
         }
     }
 }
