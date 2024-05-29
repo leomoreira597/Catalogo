@@ -16,17 +16,17 @@ namespace catalog.Controllers
     public class ProdutosController : ControllerBase
     {
         
-        private readonly IProductRepository _productRepository;
+        private readonly IUnitOfWork _uof;
 
-        public ProdutosController(IProductRepository productRepository)
+        public ProdutosController(IUnitOfWork uof)
         {
-            _productRepository = productRepository;
+            _uof = uof;
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<Product>> GetProducts()
         {
-            var products = _productRepository.GetAll();
+            var products = _uof.ProductRepository.GetAll();
             if (products is null)
             {
                 return NotFound("Produtos não encontrados....");
@@ -38,7 +38,7 @@ namespace catalog.Controllers
         public ActionResult<Product> GetProducts(int id, [BindRequired] string name)
         {
             var productName = name;
-            var product = _productRepository.Get(p => p.ProductId == id);
+            var product = _uof.ProductRepository.Get(p => p.ProductId == id);
             if (product is null)
             {
                 return NotFound("Produto não encontrado....");
@@ -48,7 +48,7 @@ namespace catalog.Controllers
         [HttpGet("products/{id}")]
         public ActionResult<IEnumerable<Product>> GetCategoryProduct(int id)
         {
-            var products = _productRepository.GetProductsForCategory(id);
+            var products = _uof.ProductRepository.GetProductsForCategory(id);
             if (products is null)
             {
                 return NotFound();
@@ -62,7 +62,8 @@ namespace catalog.Controllers
             {
                 return BadRequest();
             }
-            var newProduct = _productRepository.Create(product);
+            var newProduct = _uof.ProductRepository.Create(product);
+            _uof.Commit();
 
             return new CreatedAtRouteResult("ObterProduto", new { id = newProduct.ProductId }, newProduct);
         }
@@ -74,19 +75,20 @@ namespace catalog.Controllers
             {
                 return BadRequest("Os ids não batem.....");
             }
-            _productRepository.Updated(product);
+            _uof.ProductRepository.Updated(product);
+            _uof.Commit();
             return Ok(product);
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            var product = _productRepository.Get(p => p.ProductId == id);
+            var product = _uof.ProductRepository.Get(p => p.ProductId == id);
             if (product is null)
             {
                 return BadRequest("Produto não encontrado");
             }
-            _productRepository.Delete(product);
+            _uof.ProductRepository.Delete(product);
             return Ok($"Produto deletado com sucesso: {product}");
         }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using catalog.Context;
+using catalog.DTO;
 using catalog.Filters;
 using catalog.Models;
 using catalog.Repositories;
@@ -15,68 +16,120 @@ namespace catalog.Controllers
     [Route("[controller]")]
     public class CategoryController : ControllerBase
     {
-        private readonly ICategoryRepository _categoryRepository;
-        public CategoryController(ICategoryRepository categoryRepository)
+        private readonly IUnitOfWork _uow;
+        public CategoryController(IUnitOfWork uow)
         {
-            _categoryRepository = categoryRepository;
+            _uow = uow;
         }
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public ActionResult<IEnumerable<Category>> GetCategories()
+        public ActionResult<IEnumerable<CategoryDTO>> GetCategories()
         {
-            var category = _categoryRepository.GetAll();
-            return Ok(category);
+            var categories = _uow.CategoryRepository.GetAll();
+            var categoriesDto = new List<CategoryDTO>();
+            foreach(var category in categories)
+            {
+                var categoryDto = new CategoryDTO
+                {
+                    CategoryId = category.CategoryId,
+                    Name = category.Name,
+                    ImageUrl = category.ImageUrl
+                };
+                categoriesDto.Add(categoryDto);
+            }
+            return Ok(categoriesDto);
         }
 
         [HttpGet("Products")]
         public ActionResult<IEnumerable<Category>> GetCategoryWithProducts()
         {
-           var category = _categoryRepository.GetCategoriesWithProducts();
-           return Ok(category);
+            var category = _uow.CategoryRepository.GetCategoriesWithProducts();
+            return Ok(category);
         }
 
         [HttpGet("{id:int}", Name = "ObterCategoria")]
-        public ActionResult<Category> GetCategory(int id)
+        public ActionResult<CategoryDTO> GetCategory(int id)
         {
-            var category = _categoryRepository.Get(C => C.CategoryId == id);
+            var category = _uow.CategoryRepository.Get(C => C.CategoryId == id);
             if (category is null)
             {
                 return NotFound("categoria não encontrado....");
             }
-            return Ok(category);
+            var categoryDto = new CategoryDTO()
+            {
+                CategoryId = category.CategoryId,
+                Name = category.Name,
+                ImageUrl = category.ImageUrl
+            };
+            return Ok(categoryDto);
         }
 
         [HttpPost]
-        public ActionResult PostCategory(Category category)
+        public ActionResult<CategoryDTO> PostCategory(CategoryDTO categoryDto)
         {
-            if (category is null)
+            if (categoryDto is null)
             {
                 return BadRequest("Categoria está nula ");
             }
-            var categoryCreated = _categoryRepository.Create(category);
-            return new CreatedAtRouteResult("ObterCategoria", new { id = categoryCreated.CategoryId }, categoryCreated);
+
+            var category = new Category()
+            {
+                CategoryId = categoryDto.CategoryId,
+                Name = categoryDto.Name,
+                ImageUrl = categoryDto.ImageUrl
+            };
+
+            var categoryCreated = _uow.CategoryRepository.Create(category);
+            _uow.Commit();
+            var newCategoryDto = new CategoryDTO()
+            {
+                CategoryId = category.CategoryId,
+                Name = category.Name,
+                ImageUrl = category.ImageUrl
+            };
+            return new CreatedAtRouteResult("ObterCategoria", new { id = newCategoryDto.CategoryId }, newCategoryDto);
         }
         [HttpPut]
-        public ActionResult Put(int id, Category category)
+        public ActionResult<CategoryDTO> Put(int id, CategoryDTO categoryDto)
         {
-            if (id != category.CategoryId)
+            if (id != categoryDto.CategoryId)
             {
                 return BadRequest("Dados invalidos");
             }
-            _categoryRepository.Updated(category);
-            return Ok(category);
+            var category = new Category()
+            {
+                CategoryId = categoryDto.CategoryId,
+                Name = categoryDto.Name,
+                ImageUrl = categoryDto.ImageUrl
+            };
+            _uow.CategoryRepository.Updated(category);
+            _uow.Commit();
+            var categoryDtoUpdated = new CategoryDTO()
+            {
+                CategoryId = category.CategoryId,
+                Name = category.Name,
+                ImageUrl = category.ImageUrl
+            };
+            return Ok(categoryDtoUpdated);
         }
         [HttpDelete("{id:int}")]
-        public ActionResult Delete(int id)
+        public ActionResult<CategoryDTO> Delete(int id)
         {
-            var category = _categoryRepository.Get(c => c.CategoryId == id);
+            var category = _uow.CategoryRepository.Get(c => c.CategoryId == id);
             if (category == null)
             {
                 return NotFound("O id de categoria passado não existe");
             }
-            var categoryDeleted = _categoryRepository.Delete(category);
-            return Ok(categoryDeleted);
+            var categoryDeleted = _uow.CategoryRepository.Delete(category);
+            _uow.Commit();
+            var categoryDeletedDto = new CategoryDTO()
+            {
+                CategoryId = categoryDeleted.CategoryId,
+                Name = categoryDeleted.Name,
+                ImageUrl = categoryDeleted.ImageUrl
+            };
+            return Ok(categoryDeletedDto);
         }
     }
 }
