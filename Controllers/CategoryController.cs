@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using catalog.Context;
 using catalog.DTO;
+using catalog.DTO.Mappings;
 using catalog.Filters;
 using catalog.Models;
 using catalog.Repositories;
@@ -56,12 +57,7 @@ namespace catalog.Controllers
             {
                 return NotFound("categoria não encontrado....");
             }
-            var categoryDto = new CategoryDTO()
-            {
-                CategoryId = category.CategoryId,
-                Name = category.Name,
-                ImageUrl = category.ImageUrl
-            };
+            var categoryDto = category.ToCategoryDTO();
             return Ok(categoryDto);
         }
 
@@ -73,21 +69,11 @@ namespace catalog.Controllers
                 return BadRequest("Categoria está nula ");
             }
 
-            var category = new Category()
-            {
-                CategoryId = categoryDto.CategoryId,
-                Name = categoryDto.Name,
-                ImageUrl = categoryDto.ImageUrl
-            };
+            var category = categoryDto.ToCategory();
 
             var categoryCreated = _uow.CategoryRepository.Create(category);
             _uow.Commit();
-            var newCategoryDto = new CategoryDTO()
-            {
-                CategoryId = category.CategoryId,
-                Name = category.Name,
-                ImageUrl = category.ImageUrl
-            };
+            var newCategoryDto = categoryCreated.ToCategoryDTO();
             return new CreatedAtRouteResult("ObterCategoria", new { id = newCategoryDto.CategoryId }, newCategoryDto);
         }
         [HttpPut]
@@ -103,14 +89,9 @@ namespace catalog.Controllers
                 Name = categoryDto.Name,
                 ImageUrl = categoryDto.ImageUrl
             };
-            _uow.CategoryRepository.Updated(category);
+            var categoryUpdated = _uow.CategoryRepository.Updated(category);
             _uow.Commit();
-            var categoryDtoUpdated = new CategoryDTO()
-            {
-                CategoryId = category.CategoryId,
-                Name = category.Name,
-                ImageUrl = category.ImageUrl
-            };
+            var categoryDtoUpdated = categoryUpdated.ToCategoryDTO();
             return Ok(categoryDtoUpdated);
         }
         [HttpDelete("{id:int}")]
@@ -123,12 +104,7 @@ namespace catalog.Controllers
             }
             var categoryDeleted = _uow.CategoryRepository.Delete(category);
             _uow.Commit();
-            var categoryDeletedDto = new CategoryDTO()
-            {
-                CategoryId = categoryDeleted.CategoryId,
-                Name = categoryDeleted.Name,
-                ImageUrl = categoryDeleted.ImageUrl
-            };
+            var categoryDeletedDto = categoryDeleted.ToCategoryDTO();
             return Ok(categoryDeletedDto);
         }
     }

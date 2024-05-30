@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using catalog.Context;
+using catalog.DTO.Mappings;
 using catalog.Extensions;
 using catalog.Filters;
 using catalog.Repositories;
@@ -25,9 +26,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 options.UseNpgsql(psqlConnection)
 );
 
+builder.Services.AddAutoMapper(typeof(ProductDTOMappingProfile));
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request ppipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

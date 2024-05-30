@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using catalog.Context;
+using catalog.DTO;
 using catalog.Models;
 using catalog.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -17,25 +19,27 @@ namespace catalog.Controllers
     {
         
         private readonly IUnitOfWork _uof;
-
-        public ProdutosController(IUnitOfWork uof)
+        private readonly IMapper _mapper;
+        public ProdutosController(IUnitOfWork uof, IMapper mapper)
         {
             _uof = uof;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> GetProducts()
+        public ActionResult<IEnumerable<ProductDTO>> GetProducts()
         {
             var products = _uof.ProductRepository.GetAll();
             if (products is null)
             {
                 return NotFound("Produtos não encontrados....");
             }
-            return Ok(products);
+            var productsDto = _mapper.Map<IEnumerable<ProductDTO>>(products);
+            return Ok(productsDto);
         }
 
         [HttpGet("{id:int}", Name = "ObterProduto")]
-        public ActionResult<Product> GetProducts(int id, [BindRequired] string name)
+        public ActionResult<ProductDTO> GetProducts(int id, [BindRequired] string name)
         {
             var productName = name;
             var product = _uof.ProductRepository.Get(p => p.ProductId == id);
@@ -43,53 +47,59 @@ namespace catalog.Controllers
             {
                 return NotFound("Produto não encontrado....");
             }
-            return Ok(product);
+            var productDto = _mapper.Map<ProductDTO>(product);
+            return Ok(productDto);
         }
         [HttpGet("products/{id}")]
-        public ActionResult<IEnumerable<Product>> GetCategoryProduct(int id)
+        public ActionResult<IEnumerable<ProductDTO>> GetCategoryProduct(int id)
         {
             var products = _uof.ProductRepository.GetProductsForCategory(id);
             if (products is null)
             {
                 return NotFound();
             }
-            return Ok(products);
+            var productsDto = _mapper.Map<IEnumerable<ProductDTO>>(products);
+            return Ok(productsDto);
         }
         [HttpPost]
-        public ActionResult Post(Product product)
+        public ActionResult<ProductDTO> Post(ProductDTO productDto)
         {
-            if (product is null)
+            if (productDto is null)
             {
                 return BadRequest();
             }
+            var product = _mapper.Map<Product>(productDto);
             var newProduct = _uof.ProductRepository.Create(product);
             _uof.Commit();
-
+            var newProductDto = _mapper.Map<ProductDTO>(newProduct);
             return new CreatedAtRouteResult("ObterProduto", new { id = newProduct.ProductId }, newProduct);
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult Put(int id, Product product)
+        public ActionResult<ProductDTO> Put(int id, ProductDTO productDto)
         {
-            if (id != product.ProductId)
+            if (id != productDto.ProductId)
             {
                 return BadRequest("Os ids não batem.....");
             }
-            _uof.ProductRepository.Updated(product);
+            var product = _mapper.Map<Product>(productDto);
+            var productUpdated = _uof.ProductRepository.Updated(product);
             _uof.Commit();
-            return Ok(product);
+            var productUpdatedDto = _mapper.Map<ProductDTO>(productUpdated);
+            return Ok(productUpdatedDto);
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult Delete(int id)
+        public ActionResult<ProductDTO> Delete(int id)
         {
             var product = _uof.ProductRepository.Get(p => p.ProductId == id);
             if (product is null)
             {
                 return BadRequest("Produto não encontrado");
             }
-            _uof.ProductRepository.Delete(product);
-            return Ok($"Produto deletado com sucesso: {product}");
+            var productDeleted = _uof.ProductRepository.Delete(product);
+            var productDeletedDto = _mapper.Map<ProductDTO>(productDeleted);
+            return Ok($"Produto deletado com sucesso: {productDeletedDto}");
         }
     }
 }
