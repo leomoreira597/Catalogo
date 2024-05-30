@@ -103,3 +103,9 @@
 /home/leonardo/Documentos/Arceus/curso-dot-net/catalog/obj/Debug/net8.0/catalog.genruntimeconfig.cache
 /home/leonardo/Documentos/Arceus/curso-dot-net/catalog/obj/Debug/net8.0/ref/catalog.dll
 /home/leonardo/Documentos/Arceus/curso-dot-net/catalog/obj/Debug/net8.0/catalog.sourcelink.json
+/home/leonardo/Documentos/Arceus/curso-dot-net/catalog/bin/Debug/net8.0/AutoMapper.dll
+/home/leonardo/Documentos/Arceus/curso-dot-net/catalog/bin/Debug/net8.0/AutoMapper.Extensions.Microsoft.DependencyInjection.dll
+/home/leonardo/Documentos/Arceus/curso-dot-net/catalog/bin/Debug/net8.0/Microsoft.AspNetCore.JsonPatch.dll
+/home/leonardo/Documentos/Arceus/curso-dot-net/catalog/bin/Debug/net8.0/Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
+/home/leonardo/Documentos/Arceus/curso-dot-net/catalog/bin/Debug/net8.0/Newtonsoft.Json.dll
+/home/leonardo/Documentos/Arceus/curso-dot-net/catalog/bin/Debug/net8.0/Newtonsoft.Json.Bson.dll

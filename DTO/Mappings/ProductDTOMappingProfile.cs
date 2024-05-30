@@ -13,6 +13,8 @@ namespace catalog.DTO.Mappings
         {
             CreateMap<Product, ProductDTO>().ReverseMap();
             CreateMap<Category, CategoryDTO>().ReverseMap();
+            CreateMap<Product,ProductDTOUpadateRequest>().ReverseMap();
+            CreateMap<Product,ProductDtoUpdateResponse>().ReverseMap();
         }
     }
 }
